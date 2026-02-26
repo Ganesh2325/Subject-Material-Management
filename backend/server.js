@@ -11,6 +11,11 @@ import authRoutes from './src/routes/authRoutes.js';
 import subjectRoutes from './src/routes/subjectRoutes.js';
 import materialRoutes from './src/routes/materialRoutes.js';
 import searchRoutes from './src/routes/searchRoutes.js';
+import dashboardRoutes from './src/routes/dashboardRoutes.js';
+import materialRequestRoutes from './src/routes/materialRequestRoutes.js';
+import bookmarkRoutes from './src/routes/bookmarkRoutes.js';
+import progressRoutes from './src/routes/progressRoutes.js';
+import materialViewRoutes from './src/routes/materialViewRoutes.js';
 import { notFound, errorHandler } from './src/middleware/errorMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +37,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/material-requests', materialRequestRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/material-views', materialViewRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,4 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
+import Subject from '../models/Subject.js';
 
 const node = process.env.ELASTICSEARCH_NODE || 'http://localhost:9200';
 
@@ -17,6 +18,71 @@ const SUBJECT_INDEX = 'acos-subjects';
 const MATERIAL_INDEX = 'acos-materials';
 
 const isSearchEnabled = () => Boolean(client);
+
+const escapeRegex = (input) =>
+  input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const mongoFallbackSearch = async (trimmedQuery) => {
+  const safe = escapeRegex(trimmedQuery);
+  const regex = new RegExp(safe, 'i');
+
+  const subjects = await Subject.find({
+    $or: [
+      { name: regex },
+      { code: regex },
+      { semester: regex },
+      { 'units.title': regex }
+    ]
+  }).lean();
+
+  const mappedSubjects =
+    subjects.map((subject) => ({
+      id: subject._id.toString(),
+      score: null,
+      subjectId: subject._id.toString(),
+      name: subject.name,
+      code: subject.code,
+      semester: subject.semester,
+      createdBy: subject.createdBy?.toString?.() ?? null,
+      units:
+        subject.units?.map((u) => ({
+          unitId: u._id.toString(),
+          title: u.title
+        })) || [],
+      createdAt: subject.createdAt || new Date()
+    })) || [];
+
+  const materials = [];
+
+  subjects.forEach((subject) => {
+    if (!Array.isArray(subject.units)) return;
+
+    subject.units.forEach((unit) => {
+      if (!Array.isArray(unit.materials)) return;
+
+      unit.materials.forEach((material) => {
+        if (!regex.test(material.title || '')) return;
+
+        materials.push({
+          id: material._id.toString(),
+          score: null,
+          materialId: material._id.toString(),
+          subjectId: subject._id.toString(),
+          unitId: unit._id.toString(),
+          subjectName: subject.name,
+          subjectCode: subject.code,
+          unitTitle: unit.title,
+          title: material.title,
+          fileUrl: material.fileUrl,
+          uploadedBy: material.uploadedBy?.toString?.() ?? null,
+          createdAt: material.createdAt || new Date()
+        });
+      });
+    });
+  });
+
+  return { subjects: mappedSubjects, materials, disabled: true };
+};
 
 export const indexSubject = async (subject) => {
   if (!isSearchEnabled()) return;
@@ -73,13 +139,13 @@ export const indexMaterial = async (subject, unit, material) => {
 };
 
 export const searchContent = async (query) => {
-  if (!isSearchEnabled()) {
-    return { subjects: [], materials: [], disabled: true };
-  }
-
   const trimmed = query?.trim();
   if (!trimmed) {
-    return { subjects: [], materials: [], disabled: false };
+    return { subjects: [], materials: [], disabled: !isSearchEnabled() };
+  }
+
+  if (!isSearchEnabled()) {
+    return mongoFallbackSearch(trimmed);
   }
 
   try {
@@ -122,7 +188,7 @@ export const searchContent = async (query) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Elasticsearch search error:', err.message);
-    return { subjects: [], materials: [], disabled: false, error: err.message };
+    return mongoFallbackSearch(trimmed);
   }
 };
 

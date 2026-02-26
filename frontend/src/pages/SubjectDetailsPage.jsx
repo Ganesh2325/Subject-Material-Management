@@ -23,6 +23,32 @@ const addMaterialApi = async ({ subjectId, unitId, title, fileUrl }) => {
   return res.data;
 };
 
+const recordMaterialViewApi = async ({ subjectId, unitId, materialId }) => {
+  const res = await client.post('/material-views', {
+    subjectId,
+    unitId,
+    materialId
+  });
+  return res.data;
+};
+
+const addBookmarkApi = async ({ subjectId, unitId, materialId }) => {
+  const res = await client.post('/bookmarks', {
+    subjectId,
+    unitId,
+    materialId
+  });
+  return res.data;
+};
+
+const toggleUnitCompletionApi = async ({ subjectId, unitId }) => {
+  const res = await client.post('/progress/unit', {
+    subjectId,
+    unitId
+  });
+  return res.data;
+};
+
 const SubjectDetailsPage = () => {
   const { subjectId } = useParams();
   const queryClient = useQueryClient();
@@ -65,6 +91,28 @@ const SubjectDetailsPage = () => {
     }
   });
 
+  const materialViewMutation = useMutation({
+    mutationFn: recordMaterialViewApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'teacher'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
+    }
+  });
+
+  const bookmarkMutation = useMutation({
+    mutationFn: addBookmarkApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
+    }
+  });
+
+  const toggleCompletionMutation = useMutation({
+    mutationFn: toggleUnitCompletionApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
+    }
+  });
+
   const handleMaterialChange = (unitId, field, value) => {
     setMaterialForm((prev) => ({
       ...prev,
@@ -93,6 +141,35 @@ const SubjectDetailsPage = () => {
       unitId,
       title: values.title,
       fileUrl: values.fileUrl
+    });
+  };
+
+  const handleOpenMaterial = (unitId, materialId, fileUrl) => {
+    if (!subjectId) return;
+
+    materialViewMutation.mutate({
+      subjectId,
+      unitId,
+      materialId
+    });
+
+    window.open(fileUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleBookmark = (unitId, materialId) => {
+    if (!subjectId) return;
+    bookmarkMutation.mutate({
+      subjectId,
+      unitId,
+      materialId
+    });
+  };
+
+  const handleToggleCompletion = (unitId) => {
+    if (!subjectId) return;
+    toggleCompletionMutation.mutate({
+      subjectId,
+      unitId
     });
   };
 
@@ -170,23 +247,35 @@ const SubjectDetailsPage = () => {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18 }}
               >
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-between text-left"
-                  onClick={() => setOpenUnitId(isOpen ? null : unit._id)}
-                >
-                  <div>
-                    <p className="text-xs text-slate-300 font-medium">
-                      {unit.title}
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      {materials.length} materials
-                    </p>
-                  </div>
-                  <span className="text-[11px] text-slate-400">
-                    {isOpen ? 'Hide' : 'Show'}
-                  </span>
-                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    className="flex-1 flex items-center justify-between text-left"
+                    onClick={() => setOpenUnitId(isOpen ? null : unit._id)}
+                  >
+                    <div>
+                      <p className="text-xs text-slate-300 font-medium">
+                        {unit.title}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {materials.length} materials
+                      </p>
+                    </div>
+                    <span className="text-[11px] text-slate-400">
+                      {isOpen ? 'Hide' : 'Show'}
+                    </span>
+                  </button>
+                  {!canManage && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleCompletion(unit._id)}
+                      className="text-[11px] px-2 py-1 rounded-lg border border-acosBorder/70 text-slate-200 hover:bg-slate-900"
+                      disabled={toggleCompletionMutation.isPending}
+                    >
+                      Mark unit complete
+                    </button>
+                  )}
+                </div>
 
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -206,22 +295,43 @@ const SubjectDetailsPage = () => {
                         {materials.map((m) => (
                           <div
                             key={m._id}
-                            className="flex items-center justify-between text-[11px] border border-acosBorder/70 rounded-xl px-3 py-2 bg-slate-950/70"
+                            className="flex items-center justify-between gap-3 text-[11px] border border-acosBorder/70 rounded-xl px-3 py-2 bg-slate-950/70"
                           >
-                            <div>
-                              <p className="text-slate-200">{m.title}</p>
+                            <div className="min-w-0">
+                              <p className="text-slate-200 truncate">
+                                {m.title}
+                              </p>
                               <p className="text-slate-500 truncate max-w-xs">
                                 {m.fileUrl}
                               </p>
                             </div>
-                            <a
-                              href={m.fileUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-acosAccent hover:text-acosAccentSoft underline"
-                            >
-                              Open
-                            </a>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {!canManage && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleBookmark(unit._id, m._id)
+                                  }
+                                  className="px-2 py-1 rounded-lg border border-acosBorder/70 text-[10px] text-slate-200 hover:bg-slate-900"
+                                  disabled={bookmarkMutation.isPending}
+                                >
+                                  Bookmark
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleOpenMaterial(
+                                    unit._id,
+                                    m._id,
+                                    m.fileUrl
+                                  )
+                                }
+                                className="text-acosAccent hover:text-acosAccentSoft underline"
+                              >
+                                Open
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

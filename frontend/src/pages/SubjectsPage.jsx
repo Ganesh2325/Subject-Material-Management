@@ -70,7 +70,7 @@ const SubjectsPage = () => {
       {canManage && (
         <section className="acos-card px-4 py-4">
           <p className="text-xs text-slate-300 mb-2 font-medium">
-            Add subject (admin / faculty)
+            Add subject ( faculty)
           </p>
           <form
             onSubmit={onSubmit}

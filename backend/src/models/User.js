@@ -25,7 +25,43 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'faculty', 'student'],
       default: 'student',
       required: true
-    }
+    },
+    lastOpened: {
+      subject: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subject',
+        default: null
+      },
+      unitId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+      },
+      materialId: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+      },
+      openedAt: {
+        type: Date,
+        default: null
+      }
+    },
+    completedUnits: [
+      {
+        subject: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Subject',
+          required: true
+        },
+        unitId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true
+        },
+        completedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ]
   },
   { timestamps: true }
 );

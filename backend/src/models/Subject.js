@@ -17,6 +17,11 @@ const materialSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
+    viewCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     createdAt: {
       type: Date,
       default: Date.now
