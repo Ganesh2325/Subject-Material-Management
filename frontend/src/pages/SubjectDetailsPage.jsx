@@ -15,16 +15,24 @@ const addUnitApi = async ({ subjectId, title }) => {
   return res.data;
 };
 
-const addMaterialApi = async ({ subjectId, unitId, title, fileUrl }) => {
-  const res = await client.post(`/materials/${subjectId}/unit/${unitId}`, {
-    title,
-    fileUrl
+const addMaterialApi = async ({ subjectId, unitId, title, file }) => {
+  const form = new FormData();
+  form.append('title', title);
+  form.append('file', file);
+
+  const res = await client.post(`/subjects/${subjectId}/unit/${unitId}/material`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' }
   });
   return res.data;
 };
 
-const recordMaterialViewApi = async ({ subjectId, unitId, materialId }) => {
-  const res = await client.post('/material-views', {
+const getMaterialApi = async ({ materialId }) => {
+  const res = await client.get(`/material/${materialId}`);
+  return res.data;
+};
+
+const recordMaterialDownloadApi = async ({ subjectId, unitId, materialId }) => {
+  const res = await client.post('/material-views/download', {
     subjectId,
     unitId,
     materialId
@@ -54,6 +62,7 @@ const SubjectDetailsPage = () => {
   const queryClient = useQueryClient();
   const { role } = useAuth();
   const canManage = role === 'admin' || role === 'faculty';
+  const MAX_BYTES = 100 * 1024 * 1024;
 
   const { data: subjects = [], isLoading } = useQuery({
     queryKey: ['subjects'],
@@ -91,8 +100,22 @@ const SubjectDetailsPage = () => {
     }
   });
 
-  const materialViewMutation = useMutation({
-    mutationFn: recordMaterialViewApi,
+  const getMaterialMutation = useMutation({
+    mutationFn: getMaterialApi,
+    onSuccess: (data) => {
+      const fileSrc = resolveFileUrl(data?.material?.fileUrl);
+      if (fileSrc) {
+        window.open(fileSrc, '_blank', 'noopener,noreferrer');
+      }
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'teacher'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+    },
+    onError: () => {}
+  });
+
+  const materialDownloadMutation = useMutation({
+    mutationFn: recordMaterialDownloadApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'teacher'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
@@ -123,6 +146,23 @@ const SubjectDetailsPage = () => {
     }));
   };
 
+  const formatBytes = (bytes) => {
+    if (!bytes && bytes !== 0) return '';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(mb >= 10 ? 0 : 1)} MB`;
+    const kb = bytes / 1024;
+    return `${kb.toFixed(kb >= 10 ? 0 : 1)} KB`;
+  };
+
+  const resolveFileUrl = (fileUrl) => {
+    if (!fileUrl) return '';
+    if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
+    const base = client.defaults.baseURL || '';
+    const origin = base.replace(/\/api\/?$/i, '');
+    const path = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+    return `${origin}${path}`;
+  };
+
   const onAddUnit = (e) => {
     e.preventDefault();
     if (!subjectId) return;
@@ -133,27 +173,36 @@ const SubjectDetailsPage = () => {
   const onAddMaterial = (e, unitId) => {
     e.preventDefault();
     const values = materialForm[unitId];
-    if (!values?.title || !values?.fileUrl) {
+    if (!values?.title) {
+      handleMaterialChange(unitId, 'error', 'Material title is required.');
       return;
     }
+
+    if (!values?.file) {
+      handleMaterialChange(unitId, 'error', 'Please select a file to upload.');
+      return;
+    }
+
+    if (values.file.size > MAX_BYTES) {
+      handleMaterialChange(
+        unitId,
+        'error',
+        'File too large. Maximum allowed size is 100MB.'
+      );
+      return;
+    }
+
+    handleMaterialChange(unitId, 'error', '');
     addMaterialMutation.mutate({
       subjectId,
       unitId,
       title: values.title,
-      fileUrl: values.fileUrl
+      file: values.file
     });
   };
 
-  const handleOpenMaterial = (unitId, materialId, fileUrl) => {
-    if (!subjectId) return;
-
-    materialViewMutation.mutate({
-      subjectId,
-      unitId,
-      materialId
-    });
-
-    window.open(fileUrl, '_blank', 'noopener,noreferrer');
+  const handleOpenMaterial = (materialId) => {
+    getMaterialMutation.mutate({ materialId });
   };
 
   const handleBookmark = (unitId, materialId) => {
@@ -174,36 +223,32 @@ const SubjectDetailsPage = () => {
   };
 
   if (isLoading) {
-    return <p className="text-xs text-slate-400">Loading subject…</p>;
+    return <p className="acos-meta">Loading subject…</p>;
   }
 
   if (!subject) {
-    return <p className="text-xs text-slate-400">Subject not found.</p>;
+    return <p className="acos-meta">Subject not found.</p>;
   }
 
   return (
     <div className="space-y-5">
       <header className="flex flex-col gap-1">
-        <p className="text-[11px] text-slate-400 mb-1">{subject.code}</p>
-        <h1 className="font-display text-lg text-slate-50">{subject.name}</h1>
-        <p className="text-xs text-slate-400">
+        <p className="acos-meta mb-1">{subject.code}</p>
+        <h1 className="page-title">{subject.name}</h1>
+        <p className="page-subtitle">
           Semester {subject.semester} · {subject.units?.length || 0} units
         </p>
       </header>
 
       {canManage && (
         <section className="acos-card px-4 py-4">
-          <p className="text-xs text-slate-300 mb-2 font-medium">
-            Add unit (faculty / admin)
-          </p>
+          <p className="section-title mb-2">Add unit (faculty / admin)</p>
           <form
             onSubmit={onAddUnit}
             className="flex flex-col sm:flex-row gap-3 items-start sm:items-end"
           >
             <div className="flex-1 w-full">
-              <label className="block text-[11px] text-slate-400 mb-1">
-                Unit title
-              </label>
+              <label className="acos-label">Unit title</label>
               <input
                 className="acos-input"
                 value={unitTitle}
@@ -220,7 +265,7 @@ const SubjectDetailsPage = () => {
             </button>
           </form>
           {unitError && (
-            <p className="text-[11px] text-red-400 mt-2" role="alert">
+            <p className="text-xs text-red-400 mt-2" role="alert">
               {unitError}
             </p>
           )}
@@ -229,14 +274,14 @@ const SubjectDetailsPage = () => {
 
       <section className="space-y-3">
         {subject.units?.length === 0 && (
-          <p className="text-xs text-slate-400">No units yet.</p>
+          <p className="acos-meta">No units yet.</p>
         )}
 
         <AnimatePresence initial={false}>
           {subject.units?.map((unit) => {
             const isOpen = openUnitId === unit._id;
             const materials = unit.materials || [];
-            const mf = materialForm[unit._id] || { title: '', fileUrl: '' };
+            const mf = materialForm[unit._id] || { title: '', file: null, error: '' };
 
             return (
               <motion.article
@@ -254,22 +299,18 @@ const SubjectDetailsPage = () => {
                     onClick={() => setOpenUnitId(isOpen ? null : unit._id)}
                   >
                     <div>
-                      <p className="text-xs text-slate-300 font-medium">
+                      <p className="text-sm font-medium text-acad-text dark:text-slate-100">
                         {unit.title}
                       </p>
-                      <p className="text-[11px] text-slate-500">
-                        {materials.length} materials
-                      </p>
+                      <p className="acos-meta">{materials.length} materials</p>
                     </div>
-                    <span className="text-[11px] text-slate-400">
-                      {isOpen ? 'Hide' : 'Show'}
-                    </span>
+                    <span className="acos-meta">{isOpen ? 'Hide' : 'Show'}</span>
                   </button>
                   {!canManage && (
                     <button
                       type="button"
                       onClick={() => handleToggleCompletion(unit._id)}
-                      className="text-[11px] px-2 py-1 rounded-lg border border-acosBorder/70 text-slate-200 hover:bg-slate-900"
+                      className="text-xs px-2 py-1 rounded-lg border border-acad-border text-acad-text hover:bg-primary-100 hover:text-primary-700 dark:border-acosBorder dark:text-slate-200 dark:hover:bg-slate-900"
                       disabled={toggleCompletionMutation.isPending}
                     >
                       Mark unit complete
@@ -288,52 +329,93 @@ const SubjectDetailsPage = () => {
                     >
                       <div className="space-y-2">
                         {materials.length === 0 && (
-                          <p className="text-[11px] text-slate-400">
-                            No materials yet.
-                          </p>
+                          <p className="acos-meta">No materials yet.</p>
                         )}
-                        {materials.map((m) => (
-                          <div
-                            key={m._id}
-                            className="flex items-center justify-between gap-3 text-[11px] border border-acosBorder/70 rounded-xl px-3 py-2 bg-slate-950/70"
-                          >
-                            <div className="min-w-0">
-                              <p className="text-slate-200 truncate">
-                                {m.title}
-                              </p>
-                              <p className="text-slate-500 truncate max-w-xs">
-                                {m.fileUrl}
-                              </p>
+                        {materials.map((m) => {
+                          const fileSrc = resolveFileUrl(m.fileUrl);
+
+                          return (
+                            <div
+                              key={m._id}
+                              className="flex items-center justify-between gap-3 text-xs border border-acad-border rounded-xl px-3 py-2 bg-white dark:border-acosBorder dark:bg-slate-950/70"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-acad-text dark:text-slate-100 truncate">
+                                  {m.title}
+                                </p>
+                                <p className="text-xs text-acad-muted dark:text-slate-400 truncate max-w-xs">
+                                  {m.fileName || m.fileUrl}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {!canManage && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleBookmark(unit._id, m._id)
+                                      }
+                                      className="px-2 py-1 rounded-lg border border-acad-border bg-white text-xs text-acad-text hover:bg-primary-50 hover:text-primary-700 dark:border-acosBorder dark:bg-slate-900 dark:text-slate-200"
+                                      disabled={bookmarkMutation.isPending}
+                                    >
+                                      Bookmark
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenMaterial(m._id)}
+                                      className="text-acosAccent hover:text-acosAccentSoft underline"
+                                    >
+                                      Preview
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (!subjectId || !fileSrc) return;
+                                        materialDownloadMutation.mutate(
+                                          {
+                                            subjectId,
+                                            unitId: unit._id,
+                                            materialId: m._id
+                                          },
+                                          {
+                                            onSuccess: () => {
+                                              window.open(
+                                                fileSrc,
+                                                '_blank',
+                                                'noopener,noreferrer'
+                                              );
+                                            }
+                                          }
+                                        );
+                                      }}
+                                      className="px-2 py-1 rounded-lg border border-acad-border bg-white text-xs text-acad-text hover:bg-primary-50 hover:text-primary-700 dark:border-acosBorder dark:bg-slate-900 dark:text-slate-200"
+                                      disabled={materialDownloadMutation.isPending}
+                                    >
+                                      Download
+                                    </button>
+                                  </>
+                                )}
+                                {canManage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (fileSrc) {
+                                        window.open(
+                                          fileSrc,
+                                          '_blank',
+                                          'noopener,noreferrer'
+                                        );
+                                      }
+                                    }}
+                                    className="text-acosAccent hover:text-acosAccentSoft underline"
+                                  >
+                                    Open
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {!canManage && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleBookmark(unit._id, m._id)
-                                  }
-                                  className="px-2 py-1 rounded-lg border border-acosBorder/70 text-[10px] text-slate-200 hover:bg-slate-900"
-                                  disabled={bookmarkMutation.isPending}
-                                >
-                                  Bookmark
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleOpenMaterial(
-                                    unit._id,
-                                    m._id,
-                                    m.fileUrl
-                                  )
-                                }
-                                className="text-acosAccent hover:text-acosAccentSoft underline"
-                              >
-                                Open
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       {canManage && (
@@ -342,9 +424,7 @@ const SubjectDetailsPage = () => {
                           className="grid gap-2 md:grid-cols-[1.3fr,2fr,auto] items-end pt-2 border-t border-acosBorder/60"
                         >
                           <div>
-                            <label className="block text-[11px] text-slate-400 mb-1">
-                              Material title
-                            </label>
+                            <label className="acos-label">Material title</label>
                             <input
                               className="acos-input"
                               value={mf.title || ''}
@@ -359,21 +439,69 @@ const SubjectDetailsPage = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] text-slate-400 mb-1">
-                              File URL
+                            <label className="acos-label">
+                              Upload file (max 100MB)
                             </label>
-                            <input
-                              className="acos-input"
-                              value={mf.fileUrl || ''}
-                              onChange={(e) =>
-                                handleMaterialChange(
-                                  unit._id,
-                                  'fileUrl',
-                                  e.target.value
-                                )
-                              }
-                              required
-                            />
+                            <div
+                              className="rounded-2xl border border-dashed border-acosBorder/80 px-3 py-3 transition-colors hover:bg-primary-50/40 dark:hover:bg-slate-800/60"
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const dropped = e.dataTransfer.files?.[0];
+                                if (!dropped) return;
+                                if (dropped.size > MAX_BYTES) {
+                                  handleMaterialChange(unit._id, 'file', null);
+                                  handleMaterialChange(
+                                    unit._id,
+                                    'error',
+                                    'File too large. Maximum allowed size is 100MB.'
+                                  );
+                                  return;
+                                }
+                                handleMaterialChange(unit._id, 'file', dropped);
+                                handleMaterialChange(unit._id, 'error', '');
+                              }}
+                            >
+                              <input
+                                id={`material-file-${unit._id}`}
+                                type="file"
+                                className="hidden"
+                                accept=".pdf,.ppt,.pptx,.doc,.docx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                onChange={(e) => {
+                                  const picked = e.target.files?.[0];
+                                  if (!picked) return;
+                                  if (picked.size > MAX_BYTES) {
+                                    handleMaterialChange(unit._id, 'file', null);
+                                    handleMaterialChange(
+                                      unit._id,
+                                      'error',
+                                      'File too large. Maximum allowed size is 100MB.'
+                                    );
+                                    return;
+                                  }
+                                  handleMaterialChange(unit._id, 'file', picked);
+                                  handleMaterialChange(unit._id, 'error', '');
+                                }}
+                              />
+                              <label
+                                htmlFor={`material-file-${unit._id}`}
+                                className="block cursor-pointer"
+                              >
+                                <p className="text-xs font-medium text-acad-text dark:text-slate-100">
+                                  Drag & drop a PDF/PPT/DOCX here, or click to choose
+                                </p>
+                                <p className="acos-meta mt-0.5">
+                                  {mf.file
+                                    ? `${mf.file.name} • ${formatBytes(mf.file.size)}`
+                                    : 'No file selected'}
+                                </p>
+                              </label>
+                            </div>
+                            {mf.error && (
+                              <p className="text-xs text-red-400 mt-1" role="alert">
+                                {mf.error}
+                              </p>
+                            )}
                           </div>
                           <button
                             type="submit"

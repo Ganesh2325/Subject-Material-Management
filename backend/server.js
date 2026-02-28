@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -16,6 +17,7 @@ import materialRequestRoutes from './src/routes/materialRequestRoutes.js';
 import bookmarkRoutes from './src/routes/bookmarkRoutes.js';
 import progressRoutes from './src/routes/progressRoutes.js';
 import materialViewRoutes from './src/routes/materialViewRoutes.js';
+import materialAccessRoutes from './src/routes/materialAccessRoutes.js';
 import { notFound, errorHandler } from './src/middleware/errorMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +30,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+app.use('/uploads', express.static(uploadsDir));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'ACOS API' });
@@ -42,6 +51,7 @@ app.use('/api/material-requests', materialRequestRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/material-views', materialViewRoutes);
+app.use('/api/material', materialAccessRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

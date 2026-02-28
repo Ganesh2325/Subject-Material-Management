@@ -50,24 +50,23 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen auth-gradient flex items-center justify-center px-4">
       <motion.div
-        className="w-full max-w-md acos-card px-6 py-7"
+        className="w-full max-w-md auth-card px-6 py-7"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
+        whileHover={{ scale: 1.01 }}
       >
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-9 w-9 rounded-2xl bg-acosAccent flex items-center justify-center text-slate-950 font-bold">
+          <div className="h-9 w-9 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold shadow-md">
             A
           </div>
           <div>
-            <p className="font-display text-base tracking-wide">
+            <p className="font-display text-base tracking-wide text-acad-text">
               Subject Management System
             </p>
-            <p className="text-[11px] text-slate-400">
-              Role-based subject material system
-            </p>
+            <p className="acos-meta">Role-based academic content platform</p>
           </div>
         </div>
 
@@ -79,10 +78,10 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
               setMode('login');
               setError('');
             }}
-            className={`px-3 py-1.5 rounded-full border text-xs ${
+            className={`px-3 py-1.5 rounded-full border text-xs transition-colors-transform duration-200 ease-soft-out ${
               mode === 'login'
-                ? 'bg-acosAccent text-slate-950 border-transparent'
-                : 'border-acosBorder text-slate-300 hover:bg-slate-800'
+                ? 'bg-primary-500 text-white border-transparent shadow-sm'
+                : 'border-acad-border text-acad-muted hover:bg-primary-100 hover:text-primary-600'
             }`}
           >
             Login
@@ -93,10 +92,10 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
               setMode('register');
               setError('');
             }}
-            className={`px-3 py-1.5 rounded-full border text-xs ${
+            className={`px-3 py-1.5 rounded-full border text-xs transition-colors-transform duration-200 ease-soft-out ${
               mode === 'register'
-                ? 'bg-acosAccent text-slate-950 border-transparent'
-                : 'border-acosBorder text-slate-300 hover:bg-slate-800'
+                ? 'bg-primary-500 text-white border-transparent shadow-sm'
+                : 'border-acad-border text-acad-muted hover:bg-primary-100 hover:text-primary-600'
             }`}
           >
             Register
@@ -106,17 +105,15 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
 
         {mode === 'register' && (
           <div className="mb-4">
-            <p className="text-[11px] text-slate-400 mb-1">
-              Choose your role.
-            </p>
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 border border-acosBorder px-1 py-1">
+            <p className="acos-meta mb-1">Choose your role.</p>
+            <div className="inline-flex items-center gap-2 rounded-full bg-acad-bg border border-acad-border px-1 py-1">
               <button
                 type="button"
                 onClick={() => setRole('student')}
-                className={`px-3 py-1 rounded-full text-[11px] ${
+                className={`px-3 py-1 rounded-full text-xs transition-colors-transform duration-200 ease-soft-out ${
                   role === 'student'
-                    ? 'bg-acosAccent text-slate-950'
-                    : 'text-slate-300 hover:bg-slate-800'
+                    ? 'bg-primary-500 text-white shadow-sm'
+                    : 'text-acad-muted hover:bg-primary-100 hover:text-primary-600'
                 }`}
               >
                 Student
@@ -124,10 +121,10 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
               <button
                 type="button"
                 onClick={() => setRole('faculty')}
-                className={`px-3 py-1 rounded-full text-[11px] ${
+                className={`px-3 py-1 rounded-full text-xs transition-colors-transform duration-200 ease-soft-out ${
                   role === 'faculty'
-                    ? 'bg-acosAccent text-slate-950'
-                    : 'text-slate-300 hover:bg-slate-800'
+                    ? 'bg-primary-500 text-white shadow-sm'
+                    : 'text-acad-muted hover:bg-primary-100 hover:text-primary-600'
                 }`}
               >
                 Faculty
@@ -139,7 +136,7 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
         <form onSubmit={onSubmit} className="space-y-3">
           {mode === 'register' && (
             <div>
-              <label className="block text-xs mb-1 text-slate-300">
+              <label className="block text-xs mb-1 text-acad-muted">
                 Full name
               </label>
               <input
@@ -152,7 +149,7 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
             </div>
           )}
           <div>
-            <label className="block text-xs mb-1 text-slate-300">Email</label>
+            <label className="block text-xs mb-1 text-acad-muted">Email</label>
             <input
               name="email"
               type="email"
@@ -163,7 +160,7 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
             />
           </div>
           <div>
-            <label className="block text-xs mb-1 text-slate-300">
+            <label className="block text-xs mb-1 text-acad-muted">
               Password
             </label>
             <input
@@ -197,14 +194,14 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
         </form>
 
         {!hideModeToggle && (
-          <div className="mt-4 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-4 flex items-center justify-between text-xs text-acad-muted">
             <span>
               {mode === 'login' ? 'No account?' : 'Already registered?'}
             </span>
             {mode === 'login' ? (
               <button
                 type="button"
-                className="text-acosAccent hover:text-acosAccentSoft underline"
+                className="text-primary-500 hover:text-primary-600 underline transition-colors duration-200 ease-soft-out"
                 onClick={() => setMode('register')}
               >
                 Create an Account
@@ -212,7 +209,7 @@ const LoginPage = ({ initialMode = 'login', hideModeToggle = false }) => {
             ) : (
               <button
                 type="button"
-                className="text-acosAccent hover:text-acosAccentSoft underline"
+                className="text-primary-500 hover:text-primary-600 underline transition-colors duration-200 ease-soft-out"
                 onClick={() => setMode('login')}
               >
                 Go to login

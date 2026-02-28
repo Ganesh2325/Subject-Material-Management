@@ -4,29 +4,29 @@ import { motion } from 'framer-motion';
 import useAuth from '../hooks/useAuth.js';
 
 const navItemClasses =
-  'flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors';
+  'flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors-transform duration-200 ease-soft-out';
 
 const MainLayout = () => {
   const { auth, role } = useAuth();
   const isTeacher = role === 'faculty' || role === 'admin';
 
   return (
-    <div className="min-h-screen flex bg-acosBg text-slate-100">
-      <aside className="hidden md:flex w-64 flex-col border-r border-acosBorder/60 bg-slate-950/80 backdrop-blur-xl px-4 py-5">
+    <div className="min-h-screen flex bg-acad-bg text-acad-text dark:bg-transparent dark:text-slate-100">
+      <aside className="hidden md:flex w-64 flex-col border-r border-acad-border bg-acad-sidebar px-4 py-5">
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-9 w-9 rounded-2xl bg-acosAccent flex items-center justify-center text-slate-950 font-bold">
+          <div className="h-9 w-9 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold shadow-md">
             A
           </div>
           <div>
-            <p className="font-display text-sm tracking-wide"> SMS </p>
+            <p className="font-display text-sm tracking-wide text-white">SMS</p>
             <p className="text-[11px] text-slate-400">
-               Subject Management System
+              Subject Management System
             </p>
           </div>
         </div>
 
         <div className="mb-6 text-xs text-slate-400">
-          <p className="font-medium text-slate-200 mb-1">{auth?.user?.name}</p>
+          <p className="font-medium text-slate-100 mb-1">{auth?.user?.name}</p>
           <p>Role: {role}</p>
         </div>
 
@@ -42,8 +42,8 @@ const MainLayout = () => {
                 className={({ isActive }) =>
                   `${navItemClasses} ${
                     isActive
-                      ? 'bg-acosAccent text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                   }`
                 }
               >
@@ -54,8 +54,8 @@ const MainLayout = () => {
                 className={({ isActive }) =>
                   `${navItemClasses} ${
                     isActive
-                      ? 'bg-acosAccent text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                   }`
                 }
               >
@@ -66,8 +66,8 @@ const MainLayout = () => {
                 className={({ isActive }) =>
                   `${navItemClasses} ${
                     isActive
-                      ? 'bg-acosAccent text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                   }`
                 }
               >
@@ -86,8 +86,8 @@ const MainLayout = () => {
                 className={({ isActive }) =>
                   `${navItemClasses} ${
                     isActive
-                      ? 'bg-acosAccent text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                   }`
                 }
               >
@@ -99,8 +99,8 @@ const MainLayout = () => {
                   className={({ isActive }) =>
                     `${navItemClasses} ${
                       isActive
-                        ? 'bg-acosAccent text-slate-950'
-                        : 'text-slate-300 hover:bg-slate-800'
+                        ? 'bg-primary-500 text-white shadow-md'
+                        : 'text-slate-200 hover:bg-primary-600/30'
                     }`
                   }
                 >
@@ -117,24 +117,12 @@ const MainLayout = () => {
               </p>
               <div className="space-y-1">
                 <NavLink
-                  to="/activity"
-                  className={({ isActive }) =>
-                    `${navItemClasses} ${
-                      isActive
-                        ? 'bg-acosAccent text-slate-950'
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`
-                  }
-                >
-                  <span>Activity</span>
-                </NavLink>
-                <NavLink
                   to="/analytics"
                   className={({ isActive }) =>
                     `${navItemClasses} ${
                       isActive
-                        ? 'bg-acosAccent text-slate-950'
-                        : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                     }`
                   }
                 >
@@ -155,8 +143,8 @@ const MainLayout = () => {
                   className={({ isActive }) =>
                     `${navItemClasses} ${
                       isActive
-                        ? 'bg-acosAccent text-slate-950'
-                        : 'text-slate-300 hover:bg-slate-800'
+                        ? 'bg-primary-500 text-white shadow-md'
+                        : 'text-slate-200 hover:bg-primary-600/30'
                     }`
                   }
                 >
@@ -168,8 +156,8 @@ const MainLayout = () => {
                 className={({ isActive }) =>
                   `${navItemClasses} ${
                     isActive
-                      ? 'bg-acosAccent text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
                   }`
                 }
               >
@@ -181,20 +169,22 @@ const MainLayout = () => {
       </aside>
 
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-acosBorder/60 bg-slate-950/80 backdrop-blur-xl">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-acad-border bg-acad-sidebar">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-2xl bg-acosAccent flex items-center justify-center text-slate-950 font-bold">
+            <div className="h-8 w-8 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold shadow-md">
               A
             </div>
             <div>
-              <p className="font-display text-sm tracking-wide">ACOS</p>
-              <p className="text-[11px] text-slate-400">Academic Subject Management System</p>
+              <p className="font-display text-sm tracking-wide text-white">ACOS</p>
+              <p className="text-[11px] text-slate-400">
+                Academic Subject Management System
+              </p>
             </div>
           </div>
-          <span className="text-[11px] text-slate-500">{role}</span>
+          <span className="text-[11px] text-slate-400">{role}</span>
         </header>
 
-        <main className="flex-1 px-4 py-5 md:px-6 md:py-6">
+        <main className="flex-1 px-4 py-5 md:px-6 md:py-6 bg-acad-bg dark:bg-transparent">
           <motion.div
             className="max-w-6xl mx-auto"
             initial={{ opacity: 0, y: 12 }}

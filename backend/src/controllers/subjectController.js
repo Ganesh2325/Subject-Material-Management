@@ -67,15 +67,15 @@ export const addUnit = async (req, res) => {
 
 export const addMaterial = async (req, res) => {
   const { id, unitId } = req.params;
-  const { title, fileUrl } = req.body;
+  const { title, fileUrl: bodyFileUrl } = req.body;
 
   if (!isValidObjectId(id) || !isValidObjectId(unitId)) {
     res.status(400).json({ message: 'Invalid subject or unit id' });
     return;
   }
 
-  if (!title || !fileUrl) {
-    res.status(400).json({ message: 'Material title and fileUrl are required' });
+  if (!title) {
+    res.status(400).json({ message: 'Material title is required' });
     return;
   }
 
@@ -91,9 +91,17 @@ export const addMaterial = async (req, res) => {
     return;
   }
 
+  const fileUrl = req.file ? `/uploads/${req.file.filename}` : bodyFileUrl;
+  if (!fileUrl) {
+    res.status(400).json({ message: 'Material file is required' });
+    return;
+  }
+
   const material = {
     title,
     fileUrl,
+    fileName: req.file?.originalname,
+    fileSize: req.file?.size,
     uploadedBy: req.user._id,
     createdAt: new Date()
   };
@@ -104,7 +112,12 @@ export const addMaterial = async (req, res) => {
   const savedMaterial = unit.materials[unit.materials.length - 1];
   await indexMaterial(subject, unit, savedMaterial);
 
-  res.status(201).json(subject);
+  res.status(201).json({
+    message: 'Material added',
+    subjectId: subject._id,
+    unitId: unit._id,
+    material: savedMaterial
+  });
 };
 
 export const deleteMaterial = async (req, res) => {

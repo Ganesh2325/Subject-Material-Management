@@ -7,6 +7,7 @@ import {
   deleteMaterial
 } from '../controllers/subjectController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import { uploadMaterialFile } from '../middleware/materialUploadMiddleware.js';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.post(
   '/:id/unit/:unitId/material',
   protect,
   authorize('faculty', 'admin'),
+  uploadMaterialFile,
   addMaterial
 );
 

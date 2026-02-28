@@ -2,13 +2,21 @@ import { Client } from '@elastic/elasticsearch';
 import Subject from '../models/Subject.js';
 
 const node = process.env.ELASTICSEARCH_NODE || 'http://localhost:9200';
+const enableElastic =
+  process.env.ENABLE_ELASTICSEARCH &&
+  process.env.ENABLE_ELASTICSEARCH.toLowerCase() === 'true';
 
 let client;
 
 try {
-  client = new Client({ node });
-  // eslint-disable-next-line no-console
-  console.log(`Elasticsearch client configured for ${node}`);
+  if (enableElastic) {
+    client = new Client({ node });
+    // eslint-disable-next-line no-console
+    console.log(`Elasticsearch client configured for ${node}`);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Elasticsearch disabled. Using Mongo-based search only.');
+  }
 } catch (err) {
   // eslint-disable-next-line no-console
   console.error('Failed to create Elasticsearch client:', err.message);
@@ -17,7 +25,7 @@ try {
 const SUBJECT_INDEX = 'acos-subjects';
 const MATERIAL_INDEX = 'acos-materials';
 
-const isSearchEnabled = () => Boolean(client);
+const isSearchEnabled = () => Boolean(client && enableElastic);
 
 const escapeRegex = (input) =>
   input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

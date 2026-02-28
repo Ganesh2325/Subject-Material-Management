@@ -12,6 +12,14 @@ const materialSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    fileName: {
+      type: String,
+      trim: true
+    },
+    fileSize: {
+      type: Number,
+      min: 0
+    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

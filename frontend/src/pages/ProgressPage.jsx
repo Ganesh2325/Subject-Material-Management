@@ -18,18 +18,18 @@ const ProgressPage = () => {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-xl text-slate-50">Progress</h1>
-        <p className="text-xs text-slate-400">
+        <h1 className="page-title">Progress</h1>
+        <p className="page-subtitle">
           Track how much of each subject you have completed.
         </p>
       </header>
 
       <section className="acos-card px-4 py-4">
         {isLoading && (
-          <p className="text-xs text-slate-500">Calculating your progress…</p>
+          <p className="acos-meta">Calculating your progress…</p>
         )}
         {!isLoading && subjects.length === 0 && (
-          <p className="text-xs text-slate-500">
+          <p className="acos-meta">
             No subjects available yet. Once your faculty adds subjects, your
             progress will appear here.
           </p>
@@ -39,18 +39,18 @@ const ProgressPage = () => {
             {subjects.map((s) => (
               <li key={s._id} className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <p className="text-slate-100 font-medium">
+                  <p className="text-acad-text dark:text-slate-100 font-medium">
                     {s.name}{' '}
-                    <span className="text-[11px] text-slate-500">
+                    <span className="acos-meta">
                       ({s.code})
                     </span>
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="acos-meta">
                     {s.stats?.completedUnits || 0}/{s.stats?.totalUnits || 0}{' '}
                     units • {s.stats?.progress || 0}%
                   </p>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-acosAccent"
                     style={{ width: `${s.stats?.progress || 0}%` }}

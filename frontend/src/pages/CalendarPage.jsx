@@ -49,8 +49,8 @@ const CalendarPage = () => {
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-xl text-slate-50">Calendar</h1>
-          <p className="text-xs text-slate-400">
+          <h1 className="font-display text-xl text-acad-text">Calendar</h1>
+          <p className="text-xs text-acad-muted">
             View upcoming exams, assignments and academic events.
           </p>
         </div>
@@ -58,15 +58,15 @@ const CalendarPage = () => {
           <button
             type="button"
             onClick={goPrevMonth}
-            className="px-2 py-1 rounded-lg border border-acosBorder/60 text-slate-200 hover:bg-slate-900"
+            className="px-2 py-1 rounded-lg border border-acad-border text-acad-text hover:bg-primary-100 hover:text-primary-600 transition-colors-transform duration-200 ease-soft-out"
           >
           &lt;
           </button>
-          <p className="text-slate-200 font-medium">{monthLabel}</p>
+          <p className="text-acad-text font-medium">{monthLabel}</p>
           <button
             type="button"
             onClick={goNextMonth}
-            className="px-2 py-1 rounded-lg border border-acosBorder/60 text-slate-200 hover:bg-slate-900"
+            className="px-2 py-1 rounded-lg border border-acad-border text-acad-text hover:bg-primary-100 hover:text-primary-600 transition-colors-transform duration-200 ease-soft-out"
           >
             &gt;
           </button>
@@ -75,10 +75,10 @@ const CalendarPage = () => {
 
       <section className="grid gap-4 lg:grid-cols-[2fr,1.3fr]">
         <div className="acos-card px-4 py-4">
-          <p className="text-xs text-slate-400 mb-2">Monthly view</p>
-          <div className="grid grid-cols-7 gap-1 text-[11px] text-center">
+          <p className="acos-meta mb-2">Monthly view</p>
+          <div className="grid grid-cols-7 gap-1 text-xs text-center">
             {dayNames.map((d) => (
-              <div key={d} className="text-slate-400 py-1">
+              <div key={d} className="text-acad-muted dark:text-slate-300 py-1">
                 {d}
               </div>
             ))}
@@ -86,7 +86,7 @@ const CalendarPage = () => {
               if (!day) {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <div key={idx} className="h-10 rounded-lg border border-acosBorder/20 bg-slate-950/10" />
+                  <div key={idx} className="h-10 rounded-lg border border-acad-border/40 bg-slate-200/40" />
                 );
               }
 
@@ -99,10 +99,10 @@ const CalendarPage = () => {
                 // eslint-disable-next-line react/no-array-index-key
                 <div
                   key={idx}
-                  className={`h-10 rounded-lg border text-slate-200 flex items-center justify-center ${
+                  className={`h-10 rounded-lg border text-acad-text flex items-center justify-center ${
                     isToday
-                      ? 'border-acosAccent bg-acosAccent/20 font-semibold'
-                      : 'border-acosBorder/40 bg-slate-950/40'
+                      ? 'border-primary-500 bg-primary-100 font-semibold text-primary-700'
+                      : 'border-acad-border/60 bg-white'
                   }`}
                 >
                   {day}
@@ -113,8 +113,8 @@ const CalendarPage = () => {
         </div>
 
         <div className="acos-card px-4 py-4">
-          <p className="text-xs text-slate-400 mb-2">Upcoming events</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-acad-muted mb-2">Upcoming events</p>
+          <p className="text-xs text-acad-muted">
             No upcoming events yet. Once your faculty adds exams or deadlines,
             they will appear here.
           </p>

@@ -27,8 +27,8 @@ const RequestsPage = () => {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-xl text-slate-50">Requests</h1>
-        <p className="text-xs text-slate-400">
+        <h1 className="page-title">Requests</h1>
+        <p className="page-subtitle">
           {isTeacher
             ? 'Review material requests from your students.'
             : 'Track the status of materials you have requested.'}
@@ -37,10 +37,10 @@ const RequestsPage = () => {
 
       <section className="acos-card px-4 py-4">
         {isLoading && (
-          <p className="text-xs text-slate-500">Loading requests…</p>
+          <p className="acos-meta">Loading requests…</p>
         )}
         {!isLoading && requests.length === 0 && (
-          <p className="text-xs text-slate-500">
+          <p className="acos-meta">
             {isTeacher
               ? 'There are no requests at the moment.'
               : 'You have not requested any materials yet.'}
@@ -53,10 +53,10 @@ const RequestsPage = () => {
                 key={req._id}
                 className="rounded-lg border border-acosBorder/60 px-3 py-2"
               >
-                <p className="text-slate-100 font-medium">
+                <p className="text-acad-text dark:text-slate-100 font-medium">
                   {req.requestedTitle || 'Material request'}
                 </p>
-                <p className="text-[11px] text-slate-500">
+                <p className="acos-meta">
                   Status: {req.status || 'pending'}
                 </p>
               </li>

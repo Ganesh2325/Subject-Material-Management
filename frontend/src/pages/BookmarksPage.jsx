@@ -18,18 +18,18 @@ const BookmarksPage = () => {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-xl text-slate-50">Bookmarks</h1>
-        <p className="text-xs text-slate-400">
+        <h1 className="font-display text-xl text-acad-text">Bookmarks</h1>
+        <p className="text-xs text-acad-muted">
           Quick access to all materials you have saved.
         </p>
       </header>
 
       <section className="acos-card px-4 py-4">
         {isLoading && (
-          <p className="text-xs text-slate-500">Loading bookmarked materials…</p>
+          <p className="text-xs text-acad-muted">Loading bookmarked materials…</p>
         )}
         {!isLoading && bookmarks.length === 0 && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-acad-muted">
             You have not bookmarked any materials yet.
           </p>
         )}
@@ -38,20 +38,20 @@ const BookmarksPage = () => {
             {bookmarks.map((bm) => (
               <li
                 key={bm._id}
-                className="rounded-lg border border-acosBorder/60 px-3 py-2 flex items-center justify-between gap-3"
+                className="rounded-lg border border-acad-border px-3 py-2 flex items-center justify-between gap-3 bg-white hover:bg-primary-100/40 transition-colors-transform duration-200 ease-soft-out"
               >
                 <div className="min-w-0">
-                  <p className="text-slate-100 font-medium truncate">
+                  <p className="text-acad-text font-medium truncate">
                     {bm.materialTitle || 'Material'}
                   </p>
                   {bm.subjectName && (
-                    <p className="text-[11px] text-slate-500 truncate">
+                    <p className="acos-meta truncate">
                       {bm.subjectName}
                       {bm.unitTitle ? ` • ${bm.unitTitle}` : ''}
                     </p>
                   )}
                 </div>
-                <span className="text-[11px] text-slate-600">
+                <span className="acos-meta">
                   {new Date(bm.createdAt).toLocaleDateString()}
                 </span>
               </li>
