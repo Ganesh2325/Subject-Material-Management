@@ -27,8 +27,12 @@ const materialRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'resolved'],
+      enum: ['pending', 'resolved', 'rejected'],
       default: 'pending'
+    },
+    responseMessage: {
+      type: String,
+      default: ''
     },
     resolvedAt: {
       type: Date,

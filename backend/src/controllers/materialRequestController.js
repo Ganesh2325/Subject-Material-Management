@@ -53,8 +53,9 @@ export const createMaterialRequest = async (req, res) => {
   res.status(201).json(request);
 };
 
-export const listPendingMaterialRequestsForTeacher = async (req, res) => {
+export const getMaterialRequestsForTeacher = async (req, res) => {
   const teacherId = req.user._id;
+  const { status } = req.query;
 
   const subjects = await Subject.find({ createdBy: teacherId })
     .select('_id')
@@ -69,10 +70,12 @@ export const listPendingMaterialRequestsForTeacher = async (req, res) => {
     return;
   }
 
-  const requests = await MaterialRequest.find({
-    subject: { $in: subjectIds },
-    status: 'pending'
-  })
+  let filter = { subject: { $in: subjectIds } };
+  if (status) {
+    filter.status = status;
+  }
+
+  const requests = await MaterialRequest.find(filter)
     .populate('student', 'name email')
     .populate('subject', 'name code')
     .sort({ createdAt: -1 })
@@ -81,11 +84,34 @@ export const listPendingMaterialRequestsForTeacher = async (req, res) => {
   res.json(requests);
 };
 
-export const resolveMaterialRequest = async (req, res) => {
+export const getMaterialRequestsForStudent = async (req, res) => {
+  const studentId = req.user._id;
+  const { status } = req.query;
+  
+  let filter = { student: studentId };
+  if (status) {
+    filter.status = status;
+  }
+
+  const requests = await MaterialRequest.find(filter)
+    .populate('subject', 'name code')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.json(requests);
+};
+
+export const updateMaterialRequestStatus = async (req, res) => {
   const { id } = req.params;
+  const { status, responseMessage } = req.body;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ message: 'Invalid request id' });
+    return;
+  }
+
+  if (!['resolved', 'rejected'].includes(status)) {
+    res.status(400).json({ message: 'Status must be resolved or rejected' });
     return;
   }
 
@@ -105,15 +131,16 @@ export const resolveMaterialRequest = async (req, res) => {
     return;
   }
 
-  if (request.status === 'resolved') {
-    res.json(request);
-    return;
+  request.status = status;
+  if (responseMessage) {
+    request.responseMessage = responseMessage;
   }
-
-  request.status = 'resolved';
-  request.resolvedAt = new Date();
+  
+  if (status === 'resolved') {
+    request.resolvedAt = new Date();
+  }
+  
   await request.save();
 
   res.json(request);
 };
-

@@ -15,7 +15,8 @@ const activityLogSchema = new mongoose.Schema(
         'material_added',
         'material_viewed',
         'material_requested',
-        'material_downloaded'
+        'material_downloaded',
+        'material_bookmarked'
       ],
       required: true
     },

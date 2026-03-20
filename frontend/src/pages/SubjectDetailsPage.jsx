@@ -126,6 +126,7 @@ const SubjectDetailsPage = () => {
     mutationFn: addBookmarkApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'student'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics', 'student'] });
     }
   });
 

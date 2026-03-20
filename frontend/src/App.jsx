@@ -14,9 +14,11 @@ import AnalyticsPage from './pages/AnalyticsPage.jsx';
 import ActivityPage from './pages/ActivityPage.jsx';
 import RequestsPage from './pages/RequestsPage.jsx';
 import AnnouncementsPage from './pages/AnnouncementsPage.jsx';
+import NotificationsPage from './pages/NotificationsPage.jsx';
 import ProgressPage from './pages/ProgressPage.jsx';
 import MainLayout from './components/MainLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
+import PublicRoute from './routes/PublicRoute.jsx';
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -47,17 +49,21 @@ const AppRoutes = () => {
         <Route
           path="/login"
           element={
-            <PageWrapper>
-              <LoginPage />
-            </PageWrapper>
+            <PublicRoute>
+              <PageWrapper>
+                <LoginPage />
+              </PageWrapper>
+            </PublicRoute>
           }
         />
         <Route
-          path="/register"
+          path="/signup"
           element={
-            <PageWrapper>
-              <RegisterPage />
-            </PageWrapper>
+            <PublicRoute>
+              <PageWrapper>
+                <RegisterPage />
+              </PageWrapper>
+            </PublicRoute>
           }
         />
 
@@ -157,6 +163,14 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/notifications"
+            element={
+              <PageWrapper>
+                <NotificationsPage />
+              </PageWrapper>
+            }
+          />
+          <Route
             path="/progress"
             element={
               <PageWrapper>
@@ -166,7 +180,7 @@ const AppRoutes = () => {
           />
         </Route>
 
-        <Route path="*" element={<Navigate to="/register" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>
   );

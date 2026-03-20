@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Subject from '../models/Subject.js';
 import Bookmark from '../models/Bookmark.js';
+import ActivityLog from '../models/ActivityLog.js';
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -56,6 +57,15 @@ export const addBookmark = async (req, res) => {
     }
   );
 
+  // Log Activity
+  await ActivityLog.create({
+    actor: req.user._id,
+    type: 'material_bookmarked',
+    subject: subjectId,
+    unitId,
+    materialId
+  });
+
   res.status(201).json(bookmark);
 };
 
@@ -79,4 +89,3 @@ export const removeBookmark = async (req, res) => {
 
   res.json({ message: 'Bookmark removed' });
 };
-

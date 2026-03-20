@@ -11,8 +11,8 @@ const MainLayout = () => {
   const isTeacher = role === 'faculty' || role === 'admin';
 
   return (
-    <div className="min-h-screen flex bg-acad-bg text-acad-text dark:bg-transparent dark:text-slate-100">
-      <aside className="hidden md:flex w-64 flex-col border-r border-acad-border bg-acad-sidebar px-4 py-5">
+    <div className="min-h-screen flex bg-acad-bg text-acad-text dark:bg-acosBg dark:bg-opacity-0 transition-colors duration-300 dark:text-slate-100">
+      <aside className="hidden md:flex w-64 flex-col border-r border-acad-border bg-acad-sidebar px-4 py-5 overflow-y-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-9 w-9 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold shadow-md">
             A
@@ -27,10 +27,10 @@ const MainLayout = () => {
 
         <div className="mb-6 text-xs text-slate-400">
           <p className="font-medium text-slate-100 mb-1">{auth?.user?.name}</p>
-          <p>Role: {role}</p>
+          <p className="capitalize">Role: {role}</p>
         </div>
 
-        <nav className="flex-1 space-y-4 text-sm">
+        <nav className="flex-1 space-y-6 text-sm pb-6">
           <div>
             <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
               Main
@@ -107,30 +107,72 @@ const MainLayout = () => {
                   <span>Progress</span>
                 </NavLink>
               )}
+              <NavLink
+                to="/requests"
+                className={({ isActive }) =>
+                  `${navItemClasses} ${
+                    isActive
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
+                  }`
+                }
+              >
+                <span>Requests</span>
+              </NavLink>
             </div>
           </div>
 
-          {isTeacher && (
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
-                Insights
-              </p>
-              <div className="space-y-1">
-                <NavLink
-                  to="/analytics"
-                  className={({ isActive }) =>
-                    `${navItemClasses} ${
-                      isActive
+          <div>
+            <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
+              Updates
+            </p>
+            <div className="space-y-1">
+              <NavLink
+                to="/announcements"
+                className={({ isActive }) =>
+                  `${navItemClasses} ${
+                    isActive
                       ? 'bg-primary-500 text-white shadow-md'
                       : 'text-slate-200 hover:bg-primary-600/30'
-                    }`
-                  }
-                >
-                  <span>Analytics</span>
-                </NavLink>
-              </div>
+                  }`
+                }
+              >
+                <span>Announcements</span>
+              </NavLink>
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  `${navItemClasses} ${
+                    isActive
+                      ? 'bg-primary-500 text-white shadow-md'
+                      : 'text-slate-200 hover:bg-primary-600/30'
+                  }`
+                }
+              >
+                <span>Notifications</span>
+              </NavLink>
             </div>
-          )}
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
+              Insights
+            </p>
+            <div className="space-y-1">
+              <NavLink
+                to="/analytics"
+                className={({ isActive }) =>
+                  `${navItemClasses} ${
+                    isActive
+                    ? 'bg-primary-500 text-white shadow-md'
+                    : 'text-slate-200 hover:bg-primary-600/30'
+                  }`
+                }
+              >
+                <span>Analytics</span>
+              </NavLink>
+            </div>
+          </div>
 
           <div>
             <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">
@@ -168,7 +210,7 @@ const MainLayout = () => {
         </nav>
       </aside>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-acad-border bg-acad-sidebar">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold shadow-md">
@@ -181,10 +223,10 @@ const MainLayout = () => {
               </p>
             </div>
           </div>
-          <span className="text-[11px] text-slate-400">{role}</span>
+          <span className="text-[11px] text-slate-400 capitalize">{role}</span>
         </header>
 
-        <main className="flex-1 px-4 py-5 md:px-6 md:py-6 bg-acad-bg dark:bg-transparent">
+        <main className="flex-1 px-4 py-5 md:px-6 md:py-6 bg-acad-bg dark:bg-transparent overflow-y-auto transition-colors duration-300">
           <motion.div
             className="max-w-6xl mx-auto"
             initial={{ opacity: 0, y: 12 }}
@@ -200,4 +242,3 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
-

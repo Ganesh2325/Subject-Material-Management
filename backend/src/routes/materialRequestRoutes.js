@@ -2,27 +2,29 @@ import express from 'express';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 import {
   createMaterialRequest,
-  listPendingMaterialRequestsForTeacher,
-  resolveMaterialRequest
+  getMaterialRequestsForTeacher,
+  getMaterialRequestsForStudent,
+  updateMaterialRequestStatus
 } from '../controllers/materialRequestController.js';
 
 const router = express.Router();
 
 router.post('/', protect, authorize('student'), createMaterialRequest);
 
+router.get('/student', protect, authorize('student'), getMaterialRequestsForStudent);
+
 router.get(
-  '/pending',
+  '/teacher',
   protect,
   authorize('faculty', 'admin'),
-  listPendingMaterialRequestsForTeacher
+  getMaterialRequestsForTeacher
 );
 
 router.patch(
-  '/:id/resolve',
+  '/:id/status',
   protect,
   authorize('faculty', 'admin'),
-  resolveMaterialRequest
+  updateMaterialRequestStatus
 );
 
 export default router;
-

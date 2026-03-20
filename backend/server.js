@@ -18,6 +18,9 @@ import bookmarkRoutes from './src/routes/bookmarkRoutes.js';
 import progressRoutes from './src/routes/progressRoutes.js';
 import materialViewRoutes from './src/routes/materialViewRoutes.js';
 import materialAccessRoutes from './src/routes/materialAccessRoutes.js';
+import announcementRoutes from './src/routes/announcementRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
+import analyticsRoutes from './src/routes/analyticsRoutes.js';
 import { notFound, errorHandler } from './src/middleware/errorMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +55,9 @@ app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/material-views', materialViewRoutes);
 app.use('/api/material', materialAccessRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
